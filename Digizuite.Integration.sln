@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digizuite.Client", "Digizuite.Client\Digizuite.Client.csproj", "{7F2EE93D-3A94-4946-BAD5-F7B760530C75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digizuite.Router", "Digizuite.Router\Digizuite.Router.csproj", "{F27A824A-4EA7-4DCB-A0F6-F9FB5034D245}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digizuite.Recipient", "Digizuite.Recipient\Digizuite.Recipient.csproj", "{64DE90B3-450C-4010-A247-003DF71FF07B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digizuite.Common", "Digizuite.Common\Digizuite.Common.csproj", "{36BF15A5-E543-4DDD-B74A-D309B575EBF4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7F2EE93D-3A94-4946-BAD5-F7B760530C75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F2EE93D-3A94-4946-BAD5-F7B760530C75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F2EE93D-3A94-4946-BAD5-F7B760530C75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F2EE93D-3A94-4946-BAD5-F7B760530C75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F27A824A-4EA7-4DCB-A0F6-F9FB5034D245}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F27A824A-4EA7-4DCB-A0F6-F9FB5034D245}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F27A824A-4EA7-4DCB-A0F6-F9FB5034D245}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F27A824A-4EA7-4DCB-A0F6-F9FB5034D245}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64DE90B3-450C-4010-A247-003DF71FF07B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64DE90B3-450C-4010-A247-003DF71FF07B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64DE90B3-450C-4010-A247-003DF71FF07B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64DE90B3-450C-4010-A247-003DF71FF07B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36BF15A5-E543-4DDD-B74A-D309B575EBF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36BF15A5-E543-4DDD-B74A-D309B575EBF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36BF15A5-E543-4DDD-B74A-D309B575EBF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36BF15A5-E543-4DDD-B74A-D309B575EBF4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

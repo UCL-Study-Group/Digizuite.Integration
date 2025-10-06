@@ -1,6 +1,6 @@
-using Digizuite.Client.Models;
 using Digizuite.Common.Constants;
 using Digizuite.Common.Helpers;
+using Digizuite.Common.Models;
 using RabbitMQ.Client;
 
 namespace Digizuite.Client.Services;
@@ -41,17 +41,10 @@ public class RabbitService
         await _channel.ExchangeDeclareAsync(Exchanges.FileExchange, ExchangeType.Direct, durable: false);
     }
 
-    public async Task SendFileAsync(PreparedFile file)
+    public async Task SendFileAsync(TransferFile file)
     {
         if (_channel is null)
             return;
-        
-        var body = new
-        {
-            file.FileName,
-            file.MimeType,
-            file.Data,
-        };
 
         var properties = new BasicProperties()
         {
@@ -61,7 +54,7 @@ public class RabbitService
         await _channel.BasicPublishAsync(
             exchange: Exchanges.FileExchange,
             routingKey: "file.queue.new",
-            body: EncodingHelper.EncodeMessage(body), 
+            body: EncodingHelper.EncodeMessage(file), 
             basicProperties: properties,
             mandatory: false);
     }

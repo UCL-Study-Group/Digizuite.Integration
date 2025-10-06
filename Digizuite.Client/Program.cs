@@ -1,10 +1,5 @@
-﻿using System.Text;
-using System.Text.Json;
-using Digizuite.Client.Helpers;
+﻿using Digizuite.Client.Helpers;
 using Digizuite.Client.Services;
-using Digizuite.Common.Constants;
-using Digizuite.Common.Helpers;
-using RabbitMQ.Client;
 
 namespace Digizuite.Client;
 
@@ -23,12 +18,15 @@ class Program
         {
             Console.WriteLine("Searching for files...");
 
-            var filePaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory + "/Files");
-            
-            foreach (var filePath in filePaths)
-                await RouteFileAsync(filePath);
-            
             var input = Console.ReadLine();
+
+            if (input == "test")
+            {
+                var filePaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory + "/Files");
+                
+                foreach (var filePath in filePaths)
+                    await RouteFileAsync(filePath);
+            } 
             
             if (input == "exit")
                 break;

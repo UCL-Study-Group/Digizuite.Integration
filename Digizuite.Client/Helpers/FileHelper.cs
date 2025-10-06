@@ -1,17 +1,17 @@
-using Digizuite.Client.Models;
+using Digizuite.Common.Models;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace Digizuite.Client.Helpers;
 
 public static class FileHelper
 {
-    public static async Task<PreparedFile> GetReadyFileAsync(string filePath)
+    public static async Task<TransferFile> GetReadyFileAsync(string filePath)
     {
         var provider = new FileExtensionContentTypeProvider();
 
         if (provider.TryGetContentType(filePath, out var contentType))
         {
-            return new PreparedFile()
+            return new TransferFile()
             {
                 FileName = Path.GetFileName(filePath),
                 MimeType = contentType,
@@ -20,7 +20,7 @@ public static class FileHelper
         }
         else
         {
-            return new PreparedFile()
+            return new TransferFile()
             {
                 FileName = filePath,
                 MimeType = filePath,

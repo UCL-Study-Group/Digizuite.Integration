@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Digizuite.Client.Helpers;
+using Digizuite.Client.Services;
 using Digizuite.Common.Constants;
 using Digizuite.Common.Helpers;
 using RabbitMQ.Client;
@@ -8,84 +10,52 @@ namespace Digizuite.Client;
 
 class Program
 {
-    private static IConnection? _connection;
-    private static IChannel? _channel;
+    private static RabbitService? _rabbitService;
     
     static async Task Main()
     {
-        await SetupConnectionsAsync();
-        await DeclareConnectionsAsync();
+        _rabbitService = new RabbitService();
+        
+        await _rabbitService.SetupConnectionsAsync();
+        await _rabbitService.DeclareConnectionsAsync();
 
         while (true)
         {
-            Console.WriteLine("Enter what type of file to send...");
+            Console.WriteLine("Searching for files...");
+
+            var filePaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory + "/Files");
+            
+            foreach (var filePath in filePaths)
+                await RouteFileAsync(filePath);
             
             var input = Console.ReadLine();
             
             if (input == "exit")
                 break;
-
-            switch (input)
-            {
-                case "mp4":
-                    await SendFileAsync(input);
-                    break;
-                case "png":
-                    await SendFileAsync(input);
-                    break;
-                default:
-                    Console.WriteLine("Unsupported file type!");
-                    break;
-            }
             
             Thread.Sleep(3000);
             Console.Clear();
         }
     }
 
-    private static async Task SetupConnectionsAsync()
+    private static async Task RouteFileAsync(string input)
     {
-        if (_connection is not null && _connection.IsOpen)
+        if (_rabbitService == null)
             return;
 
-        var factory = new ConnectionFactory()
-        {
-            HostName = "localhost"
-        };
-
-        _connection = await factory.CreateConnectionAsync();
+        var file = await FileHelper.GetReadyFileAsync(input);
         
-        _channel = await _connection.CreateChannelAsync();
-    }
-
-    private static async Task DeclareConnectionsAsync()
-    {
-        if (_channel is null)
-            return;
-
-        await _channel.ExchangeDeclareAsync(Exchanges.FileExchange, ExchangeType.Direct, durable: false);
-    }
-
-    private static async Task SendFileAsync(string fileType)
-    {
-        if (_channel is null)
-            return;
-        
-        var body = new
+        switch (file.MimeType)
         {
-            fileType
-        };
-
-        var properties = new BasicProperties()
-        {
-            ContentType = fileType
-        };
-
-        await _channel.BasicPublishAsync(
-            exchange: Exchanges.FileExchange,
-            routingKey: "file.queue.new",
-            body: EncodingHelper.EncodeMessage(body), 
-            basicProperties: properties,
-            mandatory: false);
+            case "video/mp4":
+                await _rabbitService.SendFileAsync(file);
+                break;
+            case "image/jpeg":
+                await _rabbitService.SendFileAsync(file);
+                break;
+            default:
+                Console.WriteLine("Unsupported file type!");
+                break;
+        }
     }
 }

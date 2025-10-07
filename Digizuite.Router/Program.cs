@@ -94,5 +94,7 @@ class Program
 
         await _channel.QueueDeclareAsync(Queues.NewFileQueue, durable: false);
         await _channel.QueueBindAsync(Queues.NewFileQueue, Exchanges.FileExchange, "file.queue.new");
+
+
     }
 }

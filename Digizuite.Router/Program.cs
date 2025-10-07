@@ -28,13 +28,13 @@ class Program
 
                 switch (content)
                 {
-                    case "png":
+                    case "image/png":
                         await PublishMessageAsync(Exchanges.PngExchange, "new.png", ea.Body);
                         break;
                     case "pptx":
                         await PublishMessageAsync(Exchanges.PptxExchange, "new.pptx", ea.Body);
                         break;
-                    case "mp4":
+                    case "video/mp4":
                         await PublishMessageAsync(Exchanges.Mp4Exchange, "new.mp4", ea.Body);
                         break;
                     case "image/jpeg":
@@ -53,6 +53,7 @@ class Program
 
         await _channel.BasicConsumeAsync(Queues.NewFileQueue, true, consumer);
         
+        Console.WriteLine("[Router] Ready to route!");
         Console.ReadLine();
     }
 

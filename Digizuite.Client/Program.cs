@@ -1,5 +1,6 @@
 ﻿using Digizuite.Client.Helpers;
 using Digizuite.Client.Services;
+using Digizuite.Common.Models;
 
 namespace Digizuite.Client;
 
@@ -16,23 +17,30 @@ class Program
 
         while (true)
         {
-            Console.WriteLine("Searching for files...");
-
+            Console.WriteLine("[Client] Type file path or test...");
+            
             var input = Console.ReadLine();
 
-            if (input == "test")
+            if (input == "exit")
+                break;
+
+            if (Path.Exists(input))
             {
                 var filePaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory + "/Files");
                 
                 foreach (var filePath in filePaths)
                     await RouteFileAsync(filePath);
+            }
+            
+            if (input == "test")
+            {
+                await _rabbitService.SendFileAsync(new TransferFile
+                {
+                    FileName = "Video File",
+                    MimeType = "video/mp4",
+                    Data = []
+                });
             } 
-            
-            if (input == "exit")
-                break;
-            
-            Thread.Sleep(3000);
-            Console.Clear();
         }
     }
 
@@ -46,8 +54,6 @@ class Program
         switch (file.MimeType)
         {
             case "video/mp4":
-                await _rabbitService.SendFileAsync(file);
-                break;
             case "image/jpeg":
                 await _rabbitService.SendFileAsync(file);
                 break;

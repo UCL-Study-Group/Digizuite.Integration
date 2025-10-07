@@ -39,7 +39,10 @@ class Program
 
     };
 
+    Console.WriteLine("[Recipient] Ready to route!");
     await _channel.BasicConsumeAsync("mp4.queue.new", autoAck: true, consumer);
+    
+    Console.ReadLine();
   }
 
 
@@ -68,19 +71,14 @@ class Program
     await _channel.ExchangeDeclareAsync(Exchanges.RecipientExchange, ExchangeType.Fanout, durable: false);
 
     //queues
-    await _channel.QueueDeclareAsync("mp4.queue.new", durable: false);
-    await _channel.QueueDeclareAsync(Queues.MP4_Web_Queue, durable: false);
-    await _channel.QueueDeclareAsync(Queues.MP4_Press_Queue, durable: false);
-    await _channel.QueueDeclareAsync(Queues.MP4_Original_Queue, durable: false);
+    await _channel.QueueDeclareAsync("mp4.queue.new", durable: false, exclusive: false, autoDelete: false);
+    await _channel.QueueDeclareAsync(Queues.Mp4WebQueue, durable: false, exclusive: false, autoDelete: false);
+    await _channel.QueueDeclareAsync(Queues.Mp4PressQueue, durable: false, exclusive: false, autoDelete: false);
+    await _channel.QueueDeclareAsync(Queues.Mp4OriginalQueue, durable: false, exclusive: false, autoDelete: false);
 
     await _channel.QueueBindAsync("mp4.queue.new", Exchanges.Mp4Exchange, "new.mp4");
-    await _channel.QueueBindAsync(Queues.MP4_Web_Queue, Exchanges.RecipientExchange, string.Empty);
-    await _channel.QueueBindAsync(Queues.MP4_Press_Queue, Exchanges.RecipientExchange, string.Empty);
-    await _channel.QueueBindAsync(Queues.MP4_Original_Queue, Exchanges.RecipientExchange, string.Empty);
-
-
-
-
-
+    await _channel.QueueBindAsync(Queues.Mp4WebQueue, Exchanges.RecipientExchange, string.Empty);
+    await _channel.QueueBindAsync(Queues.Mp4PressQueue, Exchanges.RecipientExchange, string.Empty);
+    await _channel.QueueBindAsync(Queues.Mp4OriginalQueue, Exchanges.RecipientExchange, string.Empty);
   }
 }

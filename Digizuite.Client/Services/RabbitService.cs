@@ -41,15 +41,20 @@ public class RabbitService
         await _channel.ExchangeDeclareAsync(Exchanges.FileExchange, ExchangeType.Direct, durable: false);
     }
 
-    public async Task SendFileAsync(TransferFile file)
+    public static async Task SendFileAsync(TransferFile file)
     {
         if (_channel is null)
             return;
 
+        var id = Guid.NewGuid().ToString();
+
         var properties = new BasicProperties()
         {
+            CorrelationId = id,
             ContentType = file.MimeType,
         };
+
+        Console.WriteLine("[Client] Sending file with correlationId: {0}", id);
 
         await _channel.BasicPublishAsync(
             exchange: Exchanges.FileExchange,

@@ -10,4 +10,7 @@ public class Exchanges
 
   //Recipient exchanges
   public const string RecipientExchange = "recipient.exchange";
+  
+  // Handled Exchange
+  public const string HandledExchange = "handled.exchange";
 }

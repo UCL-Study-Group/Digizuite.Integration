@@ -23,11 +23,24 @@ class Program
     {
       try
       {
-        Console.WriteLine("[Recipient] Received message with routing key: {0}", ea.RoutingKey);
+        var routingKey = ea.RoutingKey;
+        var id = ea.BasicProperties.CorrelationId;
+        
+        Console.WriteLine("[Recipient] Received message with routing key: {0} and CorrelationId: {1}", routingKey, id);
 
         await Task.Delay(5000);
 
-        await _channel.BasicPublishAsync(Exchanges.RecipientExchange, routingKey: string.Empty, true, ea.Body);
+        var properties = new BasicProperties()
+        {
+          CorrelationId = id,
+        };
+
+        await _channel.BasicPublishAsync(
+          exchange: Exchanges.RecipientExchange,
+          routingKey: string.Empty,
+          body: ea.Body,
+          basicProperties: properties, 
+          mandatory: true);
 
         Console.WriteLine("[Recipient] Message broadcasted to Web, Press & Original queues");
       }

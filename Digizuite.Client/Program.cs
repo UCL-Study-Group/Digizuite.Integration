@@ -34,7 +34,7 @@ class Program
             
             if (input == "test")
             {
-                await _rabbitService.SendFileAsync(new TransferFile
+                await RabbitService.SendFileAsync(new TransferFile
                 {
                     FileName = "Video File",
                     MimeType = "video/mp4",
@@ -55,7 +55,7 @@ class Program
         {
             case "video/mp4":
             case "image/jpeg":
-                await _rabbitService.SendFileAsync(file);
+                await RabbitService.SendFileAsync(file);
                 break;
             default:
                 Console.WriteLine("Unsupported file type!");

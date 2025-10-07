@@ -22,7 +22,21 @@ class Program
         {
             try
             {
-                Console.WriteLine("[WebHandler] Consumed here!");
+                var id = ea.BasicProperties.CorrelationId;
+                
+                Console.WriteLine("[WebHandler] Consumed and handled: {0}", id);
+                
+                var properties = new BasicProperties()
+                {
+                    CorrelationId = id
+                };
+
+                await _channel.BasicPublishAsync(
+                    exchange: Exchanges.HandledExchange,
+                    routingKey: "web.handled.mp4",
+                    body: ea.Body,
+                    basicProperties: properties, 
+                    mandatory: true);
             }
             catch (Exception ex)
             {

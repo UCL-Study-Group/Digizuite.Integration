@@ -3,6 +3,9 @@ namespace Digizuite.Common.Constants;
 public class Queues
 {
     public const string NewFileQueue = "file.queue.new";
+    
+    // Handled Queues
+    public const string HandledQueue = "handled.queue";
 
     //Recipient queues
     public const string Mp4WebQueue = "mp4.web.queue";

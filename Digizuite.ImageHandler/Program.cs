@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Digizuite.Common.Constants;
+using Digizuite.Common.Helpers;
 using Digizuite.Common.Models;
 using Digizuite.ImageHandler.Helpers;
 using RabbitMQ.Client;
@@ -27,12 +28,25 @@ class Program
         {
             try
             {
+                var correlationId = ea.BasicProperties.CorrelationId;
+                
                 var message = Encoding.UTF8.GetString(ea.Body.ToArray());
                 
                 var file = JsonSerializer.Deserialize<TransferFile>(message);
 
                 if (file is not null && file.Data is not null)
+                {
                     file.Data = await WatermarkHelper.WatermarkImage(file.Data);
+                    var encoded = EncodingHelper.EncodeMessage(file);
+
+                    var properties = new BasicProperties()
+                    {
+                        CorrelationId = correlationId,
+                        ContentType = file.MimeType,
+                    };
+                    
+                    await _channel.BasicPublishAsync(Exchanges.StorageExchange, $"store.file", true, properties, encoded);
+                }
             }
             catch (Exception ex)
             {

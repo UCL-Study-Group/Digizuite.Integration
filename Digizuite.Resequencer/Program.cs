@@ -73,8 +73,10 @@ class Program
         Console.ReadLine();
     }
 
-    private static void AddToBuffer(string correlationId, int orderId, ReadOnlyMemory<byte> body)
+    private static async Task AddToBuffer(string correlationId, int orderId, ReadOnlyMemory<byte> body)
     {
+        var fullSequence = false;
+        
         lock (_bufferLock)
         {
             if (!_sequenceBuffer.TryGetValue(correlationId, out var list))
@@ -86,10 +88,45 @@ class Program
             list.Add((orderId, body));
 
             Console.WriteLine("[Resequencer] Added {0} for correlation id {1} to buffer", orderId, correlationId);
-            
+
             if (_sequenceBuffer[correlationId].Count == 3)
+            {
                 Console.WriteLine("[Resequencer] Full sequence for {0} sending to storage!", correlationId);
+                fullSequence = true;
+            }
         }
+        
+        if (fullSequence)
+            await ProcessSequenceAsync(correlationId);
+    }
+
+    private static async Task ProcessSequenceAsync(string correlationId)
+    {
+        if (_channel is null)
+            return;
+        
+        List<(int, ReadOnlyMemory<byte>)> messages;
+        
+        lock (_bufferLock)
+        {
+            if (!_sequenceBuffer.Remove(correlationId, out messages!))
+            {
+                Console.WriteLine("[Resequencer] Warning: Sequence {0} not found", correlationId);
+                return;
+            }
+        }
+        
+        var properties = new BasicProperties()
+        {
+            CorrelationId = correlationId
+        };
+        
+        var sorted = messages
+            .OrderBy(x => x.Item1)
+            .ToArray();
+        
+        foreach (var item in sorted)
+            await _channel.BasicPublishAsync(Exchanges.StorageExchange, $"store.file", true, properties, item.Item2);
     }
     
     private static async Task SetupConnectionsAsync()

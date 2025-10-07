@@ -8,6 +8,9 @@ class Program
 {
     private static IConnection? _connection;
     private static IChannel? _channel;
+
+    private static Dictionary<string, List<(int, ReadOnlyMemory<byte>)>> _sequenceBuffer = new();
+    private static object _bufferLock = new();
     
     static async Task Main()
     {
@@ -24,11 +27,16 @@ class Program
         {
             try
             {
-                var routingKey = ea.RoutingKey;
+                var correlationId = ea.BasicProperties.CorrelationId;
+                var orderId = ea.BasicProperties.Headers?["OrderId"];
+
+                if (correlationId is null || orderId is null)
+                {
+                    Console.WriteLine("[Resequencer] CorrelationId or OrderId is missing.");
+                    return;
+                }
                 
-                var orderId = ea.BasicProperties.Headers?["OrderId"] ?? "None";
-                
-                Console.WriteLine("[Resequencer] Received Handled from {0} with orderId {1}", routingKey, orderId);
+                AddToBuffer(correlationId, (int) orderId, ea.Body.ToArray());
             }
             catch (Exception)
             {
@@ -40,7 +48,16 @@ class Program
         {
             try
             {
-                Console.WriteLine("[Resequencer] Received Original");
+                var correlationId = ea.BasicProperties.CorrelationId;
+                var orderId = ea.BasicProperties.Headers?["OrderId"] ?? 1;
+
+                if (correlationId is null)
+                {
+                    Console.WriteLine("[Resequencer] Found no correlationId");
+                    return;
+                }
+                
+                AddToBuffer(correlationId, (int) orderId, ea.Body.ToArray());
             }
             catch (Exception)
             {
@@ -54,6 +71,25 @@ class Program
         
         Console.WriteLine("[Resequencer] Ready to receive messages");
         Console.ReadLine();
+    }
+
+    private static void AddToBuffer(string correlationId, int orderId, ReadOnlyMemory<byte> body)
+    {
+        lock (_bufferLock)
+        {
+            if (!_sequenceBuffer.TryGetValue(correlationId, out var list))
+            {
+                list = [];
+                _sequenceBuffer[correlationId] = list;
+            }
+        
+            list.Add((orderId, body));
+
+            Console.WriteLine("[Resequencer] Added {0} for correlation id {1} to buffer", orderId, correlationId);
+            
+            if (_sequenceBuffer[correlationId].Count == 3)
+                Console.WriteLine("[Resequencer] Full sequence for {0} sending to storage!", correlationId);
+        }
     }
     
     private static async Task SetupConnectionsAsync()

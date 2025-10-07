@@ -23,12 +23,14 @@ class Program
             try
             {
                 var id = ea.BasicProperties.CorrelationId;
+                var headers = new Dictionary<string, object?> { { "OrderId", 3 } };
                 
                 Console.WriteLine("[WebHandler] Consumed and handled: {0}", id);
                 
                 var properties = new BasicProperties()
                 {
-                    CorrelationId = id
+                    CorrelationId = id,
+                    Headers = headers
                 };
 
                 await _channel.BasicPublishAsync(

@@ -13,4 +13,7 @@ public class Exchanges
   
   // Handled Exchange
   public const string HandledExchange = "handled.exchange";
+  
+  // Storage Exchange
+  public const string StorageExchange = "storage.exchange";
 }

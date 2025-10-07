@@ -4,6 +4,9 @@ public class Queues
 {
     public const string NewFileQueue = "file.queue.new";
     
+    // Storage Queues
+    public const string FileQueue = "storage.queue";
+    
     // Handled Queues
     public const string HandledQueue = "handled.queue";
 

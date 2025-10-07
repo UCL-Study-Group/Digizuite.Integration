@@ -24,21 +24,24 @@ class Program
         {
             try
             {
-                var content = ea.BasicProperties.ContentType;
+                var content = ea.BasicProperties.ContentType ?? "None";
+                var id = ea.BasicProperties.CorrelationId ?? "None";
+
+                Console.WriteLine("[Router] Received ContentType: {0}, with CorrelationId: {1}", content, id);
 
                 switch (content)
                 {
-                    case "png":
-                        await PublishMessageAsync(Exchanges.PngExchange, "new.png", ea.Body);
+                    case "image/png":
+                        await PublishMessageAsync(Exchanges.PngExchange, "new.png", id, content, ea.Body);
                         break;
                     case "pptx":
-                        await PublishMessageAsync(Exchanges.PptxExchange, "new.pptx", ea.Body);
+                        await PublishMessageAsync(Exchanges.PptxExchange, "new.pptx", id, content, ea.Body);
                         break;
-                    case "mp4":
-                        await PublishMessageAsync(Exchanges.Mp4Exchange, "new.mp4", ea.Body);
+                    case "video/mp4":
+                        await PublishMessageAsync(Exchanges.Mp4Exchange, "new.mp4", id, content, ea.Body);
                         break;
                     case "image/jpeg":
-                        await PublishMessageAsync(Exchanges.JpegExchange, "new.jpeg", ea.Body);
+                        await PublishMessageAsync(Exchanges.JpegExchange, "new.jpeg", id, content, ea.Body);
                         break;
                     default:
                         Console.WriteLine("Invalid format, send to invalid message");
@@ -53,17 +56,29 @@ class Program
 
         await _channel.BasicConsumeAsync(Queues.NewFileQueue, true, consumer);
         
+        Console.WriteLine("[Router] Ready to route!");
         Console.ReadLine();
     }
 
-    private static async Task PublishMessageAsync(string exchange, string routingKey, ReadOnlyMemory<byte> body)
+    private static async Task PublishMessageAsync(string exchange, string routingKey, string correlationId, string contentType, ReadOnlyMemory<byte> body)
     {
         if (_channel is null)
             return;
 
         Console.WriteLine($"Published message to {exchange}:{routingKey}");
-        
-        await _channel.BasicPublishAsync(exchange, routingKey, true, body);
+
+        var properties = new BasicProperties()
+        {
+            CorrelationId = correlationId,
+            ContentType = contentType,
+        };
+
+        await _channel.BasicPublishAsync(
+            exchange: exchange,
+            routingKey: routingKey,
+            body: body,
+            basicProperties: properties,
+            mandatory: false);
     }
     
     private static async Task SetupConnectionsAsync()

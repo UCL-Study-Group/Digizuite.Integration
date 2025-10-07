@@ -23,11 +23,24 @@ class Program
     {
       try
       {
-        Console.WriteLine("[Recipient] Received message with routing key: {0}", ea.RoutingKey);
+        var routingKey = ea.RoutingKey;
+        var id = ea.BasicProperties.CorrelationId;
+        
+        Console.WriteLine("[Recipient] Received message with routing key: {0} and CorrelationId: {1}", routingKey, id);
 
         await Task.Delay(5000);
 
-        await _channel.BasicPublishAsync(Exchanges.RecipientExchange, routingKey: string.Empty, true, ea.Body);
+        var properties = new BasicProperties()
+        {
+          CorrelationId = id,
+        };
+
+        await _channel.BasicPublishAsync(
+          exchange: Exchanges.RecipientExchange,
+          routingKey: string.Empty,
+          body: ea.Body,
+          basicProperties: properties, 
+          mandatory: true);
 
         Console.WriteLine("[Recipient] Message broadcasted to Web, Press & Original queues");
       }
@@ -39,7 +52,10 @@ class Program
 
     };
 
+    Console.WriteLine("[Recipient] Ready to route!");
     await _channel.BasicConsumeAsync("mp4.queue.new", autoAck: true, consumer);
+    
+    Console.ReadLine();
   }
 
 
@@ -68,19 +84,14 @@ class Program
     await _channel.ExchangeDeclareAsync(Exchanges.RecipientExchange, ExchangeType.Fanout, durable: false);
 
     //queues
-    await _channel.QueueDeclareAsync("mp4.queue.new", durable: false);
-    await _channel.QueueDeclareAsync(Queues.MP4_Web_Queue, durable: false);
-    await _channel.QueueDeclareAsync(Queues.MP4_Press_Queue, durable: false);
-    await _channel.QueueDeclareAsync(Queues.MP4_Original_Queue, durable: false);
+    await _channel.QueueDeclareAsync("mp4.queue.new", durable: false, exclusive: false, autoDelete: false);
+    await _channel.QueueDeclareAsync(Queues.Mp4WebQueue, durable: false, exclusive: false, autoDelete: false);
+    await _channel.QueueDeclareAsync(Queues.Mp4PressQueue, durable: false, exclusive: false, autoDelete: false);
+    await _channel.QueueDeclareAsync(Queues.Mp4OriginalQueue, durable: false, exclusive: false, autoDelete: false);
 
     await _channel.QueueBindAsync("mp4.queue.new", Exchanges.Mp4Exchange, "new.mp4");
-    await _channel.QueueBindAsync(Queues.MP4_Web_Queue, Exchanges.RecipientExchange, string.Empty);
-    await _channel.QueueBindAsync(Queues.MP4_Press_Queue, Exchanges.RecipientExchange, string.Empty);
-    await _channel.QueueBindAsync(Queues.MP4_Original_Queue, Exchanges.RecipientExchange, string.Empty);
-
-
-
-
-
+    await _channel.QueueBindAsync(Queues.Mp4WebQueue, Exchanges.RecipientExchange, string.Empty);
+    await _channel.QueueBindAsync(Queues.Mp4PressQueue, Exchanges.RecipientExchange, string.Empty);
+    await _channel.QueueBindAsync(Queues.Mp4OriginalQueue, Exchanges.RecipientExchange, string.Empty);
   }
 }

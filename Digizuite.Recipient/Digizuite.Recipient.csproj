@@ -12,4 +12,8 @@
         <PackageReference Include="RabbitMQ.Stream.Client" Version="1.9.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Digizuite.Common\Digizuite.Common.csproj" />
+    </ItemGroup>
+
 </Project>

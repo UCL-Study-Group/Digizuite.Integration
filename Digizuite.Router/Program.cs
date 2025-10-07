@@ -37,6 +37,9 @@ class Program
                     case "mp4":
                         await PublishMessageAsync(Exchanges.Mp4Exchange, "new.mp4", ea.Body);
                         break;
+                    case "image/jpeg":
+                        await PublishMessageAsync(Exchanges.JpegExchange, "new.jpeg", ea.Body);
+                        break;
                     default:
                         Console.WriteLine("Invalid format, send to invalid message");
                         break;
@@ -53,14 +56,14 @@ class Program
         Console.ReadLine();
     }
 
-    private static async Task PublishMessageAsync(string exchange, string routingKey, object body)
+    private static async Task PublishMessageAsync(string exchange, string routingKey, ReadOnlyMemory<byte> body)
     {
         if (_channel is null)
             return;
 
         Console.WriteLine($"Published message to {exchange}:{routingKey}");
         
-        await _channel.BasicPublishAsync(exchange, routingKey, true, EncodingHelper.EncodeMessage(body));
+        await _channel.BasicPublishAsync(exchange, routingKey, true, body);
     }
     
     private static async Task SetupConnectionsAsync()
@@ -87,8 +90,11 @@ class Program
         await _channel.ExchangeDeclareAsync(Exchanges.Mp4Exchange, ExchangeType.Direct, durable: false);
         await _channel.ExchangeDeclareAsync(Exchanges.PngExchange, ExchangeType.Direct, durable: false);
         await _channel.ExchangeDeclareAsync(Exchanges.PptxExchange, ExchangeType.Direct, durable: false);
+        await _channel.ExchangeDeclareAsync(Exchanges.JpegExchange, ExchangeType.Direct, durable: false);
 
         await _channel.QueueDeclareAsync(Queues.NewFileQueue, durable: false);
         await _channel.QueueBindAsync(Queues.NewFileQueue, Exchanges.FileExchange, "file.queue.new");
+
+
     }
 }
